@@ -923,6 +923,22 @@ public protocol StreamingFingerprinterProtocol: AnyObject {
     func pushSamplesF32(samples: [Float], channels: UInt16) -> [UInt32]
 
     /**
+     * Feed PCM samples as raw f32 bytes (native byte order, interleaved).
+     *
+     * Identical to `push_samples_f32`, but the buffer crosses the FFI
+     * boundary as bytes (`Data` in Swift, `ByteArray` in Kotlin) in a single
+     * bulk copy instead of per-element float marshalling, which is
+     * significantly faster for large buffers. Pass the raw memory of your
+     * float PCM buffer (e.g., iOS AVAudioPCMBuffer `floatChannelData`).
+     *
+     * # Arguments
+     * * `data` - Raw sample bytes; length must be a multiple of 4 (one f32
+     * per sample, native byte order).
+     * * `channels` - Number of interleaved channels in the data.
+     */
+    func pushSamplesF32Bytes(data: Data, channels: UInt16) throws -> [UInt32]
+
+    /**
      * Reset all state for a new stream.
      */
     func reset()
@@ -1040,6 +1056,28 @@ open class StreamingFingerprinter:
     }
 
     /**
+     * Feed PCM samples as raw f32 bytes (native byte order, interleaved).
+     *
+     * Identical to `push_samples_f32`, but the buffer crosses the FFI
+     * boundary as bytes (`Data` in Swift, `ByteArray` in Kotlin) in a single
+     * bulk copy instead of per-element float marshalling, which is
+     * significantly faster for large buffers. Pass the raw memory of your
+     * float PCM buffer (e.g., iOS AVAudioPCMBuffer `floatChannelData`).
+     *
+     * # Arguments
+     * * `data` - Raw sample bytes; length must be a multiple of 4 (one f32
+     * per sample, native byte order).
+     * * `channels` - Number of interleaved channels in the data.
+     */
+    open func pushSamplesF32Bytes(data: Data, channels: UInt16) throws -> [UInt32] {
+        return try FfiConverterSequenceUInt32.lift(rustCallWithError(FfiConverterTypeFingerprintError.lift) {
+            uniffi_fingerprint_uniffi_fn_method_streamingfingerprinter_push_samples_f32_bytes(self.uniffiClonePointer(),
+                                                                                              FfiConverterData.lower(data),
+                                                                                              FfiConverterUInt16.lower(channels), $0)
+        })
+    }
+
+    /**
      * Reset all state for a new stream.
      */
     open func reset() {
@@ -1122,6 +1160,22 @@ public protocol StreamingWindowedFingerprinterProtocol: AnyObject {
      * Feed PCM samples (f32). Returns new windowed fingerprints.
      */
     func pushSamplesF32(samples: [Float], channels: UInt16) -> [WindowedFingerprint]
+
+    /**
+     * Feed PCM samples as raw f32 bytes (native byte order, interleaved).
+     *
+     * Identical to `push_samples_f32`, but the buffer crosses the FFI
+     * boundary as bytes (`Data` in Swift, `ByteArray` in Kotlin) in a single
+     * bulk copy instead of per-element float marshalling, which is
+     * significantly faster for large buffers. Pass the raw memory of your
+     * float PCM buffer (e.g., iOS AVAudioPCMBuffer `floatChannelData`).
+     *
+     * # Arguments
+     * * `data` - Raw sample bytes; length must be a multiple of 4 (one f32
+     * per sample, native byte order).
+     * * `channels` - Number of interleaved channels in the data.
+     */
+    func pushSamplesF32Bytes(data: Data, channels: UInt16) throws -> [WindowedFingerprint]
 
     /**
      * Reset all state.
@@ -1240,6 +1294,28 @@ open class StreamingWindowedFingerprinter:
             uniffi_fingerprint_uniffi_fn_method_streamingwindowedfingerprinter_push_samples_f32(self.uniffiClonePointer(),
                                                                                                 FfiConverterSequenceFloat.lower(samples),
                                                                                                 FfiConverterUInt16.lower(channels), $0)
+        })
+    }
+
+    /**
+     * Feed PCM samples as raw f32 bytes (native byte order, interleaved).
+     *
+     * Identical to `push_samples_f32`, but the buffer crosses the FFI
+     * boundary as bytes (`Data` in Swift, `ByteArray` in Kotlin) in a single
+     * bulk copy instead of per-element float marshalling, which is
+     * significantly faster for large buffers. Pass the raw memory of your
+     * float PCM buffer (e.g., iOS AVAudioPCMBuffer `floatChannelData`).
+     *
+     * # Arguments
+     * * `data` - Raw sample bytes; length must be a multiple of 4 (one f32
+     * per sample, native byte order).
+     * * `channels` - Number of interleaved channels in the data.
+     */
+    open func pushSamplesF32Bytes(data: Data, channels: UInt16) throws -> [WindowedFingerprint] {
+        return try FfiConverterSequenceTypeWindowedFingerprint.lift(rustCallWithError(FfiConverterTypeFingerprintError.lift) {
+            uniffi_fingerprint_uniffi_fn_method_streamingwindowedfingerprinter_push_samples_f32_bytes(self.uniffiClonePointer(),
+                                                                                                      FfiConverterData.lower(data),
+                                                                                                      FfiConverterUInt16.lower(channels), $0)
         })
     }
 
@@ -1906,6 +1982,9 @@ private var initializationResult: InitializationResult = {
     if uniffi_fingerprint_uniffi_checksum_method_streamingfingerprinter_push_samples_f32() != 35686 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_fingerprint_uniffi_checksum_method_streamingfingerprinter_push_samples_f32_bytes() != 28404 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_fingerprint_uniffi_checksum_method_streamingfingerprinter_reset() != 53798 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -1919,6 +1998,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_fingerprint_uniffi_checksum_method_streamingwindowedfingerprinter_push_samples_f32() != 17811 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_fingerprint_uniffi_checksum_method_streamingwindowedfingerprinter_push_samples_f32_bytes() != 54549 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_fingerprint_uniffi_checksum_method_streamingwindowedfingerprinter_reset() != 36251 {
