@@ -14,13 +14,5 @@
     <string>1</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
-    <key>MinimumOSVersion</key>
-    <string>13.0</string>
-    <key>CFBundleSupportedPlatforms</key>
-    <array>
-        <string>iPhoneOS</string>
-    </array>
-    <key>DTPlatformName</key>
-    <string>iphoneos</string>
 </dict>
 </plist>
